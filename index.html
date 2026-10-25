@@ -42,8 +42,8 @@ a{color:inherit}
 .cartbtn svg{width:21px;height:21px}
 .cartbtn b{position:absolute;top:-3px;right:-3px;min-width:21px;height:21px;padding:0 5px;border-radius:11px;background:var(--or);color:#111;font-size:12px;display:grid;place-items:center}
 .cartbtn b:empty{display:none}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);max-width:560px}
-.tabs a{display:block;text-align:center;padding:10px 0 11px;font-size:14px;font-weight:700;color:var(--mut);text-decoration:none;border-bottom:3px solid transparent}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);max-width:640px}
+.tabs a{display:block;text-align:center;padding:10px 0 11px;font-size:13.5px;font-weight:700;color:var(--mut);text-decoration:none;border-bottom:3px solid transparent}
 .tabs a.on{color:var(--tx);border-bottom-color:var(--or)}
 
 /* ---------- avisos ---------- */
@@ -362,6 +362,7 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
       <a href="#inicio" data-tab="inicio">Inicio</a>
       <a href="#programa" data-tab="programa">Programa</a>
       <a href="#preventa" data-tab="preventa">Preventa</a>
+      <a href="#hospedaje" data-tab="hospedaje">Hospedaje</a>
     </nav>
   </div>
 </header>
@@ -605,6 +606,36 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
     </div>
   </div>
 </div>
+
+<!-- ======================= HOSPEDAJE ======================= -->
+<div class="vista" id="v-hospedaje" hidden>
+  <div class="wrap narrow">
+    <div class="cab">
+      <div class="kicker">Mérida · 3 al 6 de enero 2027</div>
+      <h1 class="disp">Hospedaje</h1>
+    </div>
+
+    <div class="obra">
+      <div class="cinta" aria-hidden="true"></div>
+      <div class="obra-txt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M5 20l3-9h8l3 9"/><path d="M9.5 15h5M12 3v4M8.5 5.5 12 3l3.5 2.5"/></svg>
+        <div><h3 class="disp">En construcción</h3>
+        <p>Estamos preparando las opciones de hospedaje para la XIII edición. Muy pronto las publicaremos aquí.</p></div>
+      </div>
+      <div class="cinta" aria-hidden="true"></div>
+    </div>
+
+    <div class="cuadro">
+      <h2 class="disp">Hospédate con nosotros<small>Si contratas tu hospedaje con Biker Mérida, te llevamos tu kit directo a tu hotel.</small></h2>
+      <div class="botones">
+        <a class="cta full wa" id="btnWaHospedaje" target="_blank" rel="noopener" hidden>
+          <span class="ico-wa"></span><span>Pregúntanos por WhatsApp</span>
+        </a>
+        <a class="cta full borde" href="#preventa">Ir a la preventa</a>
+      </div>
+    </div>
+  </div>
+</div>
 </main>
 
 <footer>
@@ -795,7 +826,7 @@ let packCant = 1;
 let co = { entrega: 'taquilla', metodo: null, comprobante: null, idEnvio: null };
 
 /* ---------------- vistas: Inicio / Programa / Preventa ---------------- */
-const VISTAS = ['inicio', 'programa', 'preventa'];
+const VISTAS = ['inicio', 'programa', 'preventa', 'hospedaje'];
 function vistaActual() { const v = location.hash.replace('#', ''); return VISTAS.indexOf(v) === -1 ? 'inicio' : v; }
 function mostrarVista() {
   const v = vistaActual();
@@ -915,6 +946,10 @@ function pintarInfo() {
     bw.hidden = false; bw.removeAttribute('href'); bw.classList.add('apagado');
     $('#btnWaInfoTxt').textContent = 'WhatsApp (número por confirmar)';
   } else bw.hidden = true;
+  const bh = $('#btnWaHospedaje');
+  if (!bh.querySelector('svg')) bh.querySelector('.ico-wa').outerHTML = ICONO_WA;
+  if (wa) { bh.hidden = false; bh.href = 'https://wa.me/' + wa + '?text=' + encodeURIComponent('Hola Biker Mérida, quiero información sobre el hospedaje para el evento 2027.'); }
+  else bh.hidden = true;
 }
 function lineaBs(montoUsd) { return cfg.tasa_bcv ? bs(montoUsd * cfg.tasa_bcv) + ' a tasa BCV de hoy' : ''; }
 
