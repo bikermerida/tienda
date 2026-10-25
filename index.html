@@ -175,6 +175,16 @@ a{color:inherit}
 .g-puntos{display:flex;justify-content:center;gap:8px;margin-top:12px}
 .g-puntos button{width:9px;height:9px;padding:0;border-radius:50%;background:#4a4a50;transition:width .2s,background .2s}
 .g-puntos button.on{width:24px;border-radius:5px;background:var(--or)}
+.revisa{display:flex;gap:10px;align-items:flex-start;margin:16px 0 0;padding:12px 14px;border-radius:12px;background:rgba(245,134,52,.1);border:1px solid rgba(245,134,52,.45);font-size:14px;color:#ffe2c9}
+.revisa svg{width:22px;height:22px;flex:0 0 22px;stroke:var(--or);margin-top:1px}
+.revisa b{color:var(--tx)}
+.chk-revisado{display:flex;gap:12px;align-items:flex-start;margin:-10px 0 26px;padding:14px;border-radius:12px;background:var(--card);border:1.5px solid var(--line);font-size:14.5px;cursor:pointer}
+.chk-revisado input{width:22px;height:22px;flex:0 0 22px;margin:0;accent-color:var(--or)}
+.chk-revisado.mal{border-color:var(--err)}
+.chk-revisado.ok{border-color:rgba(95,209,122,.55)}
+.aclara{margin:-6px 0 16px;padding:10px 12px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);font-size:13.5px;color:#d9d4cc}
+.aclara a{color:var(--neon);font-weight:700;text-decoration:none;white-space:nowrap}
+#extras{scroll-margin-top:110px}
 .kit{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 14px 30px}
 .kit div{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 4px 8px;text-align:center;font-size:11.5px;line-height:1.2;color:#d9d4cc}
 .kit svg{display:block;width:32px;height:32px;margin:0 auto 6px;stroke:var(--or);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -556,10 +566,10 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
           <figure><img src="pack-2.webp" alt="Bolso porta casco Biker Mérida" width="720" height="960" loading="lazy"><figcaption>Bolso porta casco</figcaption></figure>
           <figure><img src="pack-4.webp" alt="Balaclava y par de mangas Biker Mérida" width="720" height="960" loading="lazy"><figcaption>Balaclava y par de mangas</figcaption></figure>
           <figure><img src="pack-1.webp" alt="Franjas reflectivas del bolso porta casco" width="720" height="960" loading="lazy"><figcaption>Franjas reflectivas del bolso</figcaption></figure>
-          <figure><img src="pack-3.webp" alt="Kit con jersey y rompeviento oficiales" width="720" height="960" loading="lazy"><figcaption>Con jersey y rompeviento (extras)</figcaption></figure>
         </div>
         <div class="g-puntos" id="gPuntos"></div>
       </div>
+      <p class="aclara">La camiseta de las fotos no está incluida. El <b>jersey</b> y el <b>rompeviento</b> se compran aparte, con tu talla, en <a href="#extras" id="lnkExtras">Extras disponibles ↓</a></p>
       <ul class="incluye">
         <li><span><b>3 brazaletes oficiales:</b> acceso para piloto, copiloto y moto durante los 4 días.</span></li>
         <li><span><b>Kit de souvenirs oficiales:</b></span></li>
@@ -577,7 +587,7 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
       <div id="compraPack"></div>
     </div>
 
-    <div class="cuadro">
+    <div class="cuadro" id="extras">
       <h2 class="disp">Extras disponibles<small>Opcionales. En el jersey y el rompeviento eliges corte, talla y cantidad para reservar tu talla.</small></h2>
       <div class="grid" id="gridPrendas"></div>
     </div>
@@ -1106,6 +1116,7 @@ function pintarCarrito() {
       '<div class="qty"><button type="button" data-l="' + i + '" data-d="-1" aria-label="Menos">−</button><span>' + l.cantidad + '</span><button type="button" data-l="' + i + '" data-d="1" aria-label="Más">+</button></div>' +
       '<div class="st">' + usd(l.precio * l.cantidad) + '</div>' +
     '</div>').join('') +
+    '<div class="revisa"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg><span><b>Revisa tu compra:</b> confirma productos, cantidades, cortes y tallas antes de pagar. Las prendas se fabrican con la talla que elijas.</span></div>' +
     '<div class="resumen">' + resumenTotales() + '</div>' +
     '<button class="cta full" id="irCheckout"' + (cfg.tienda_abierta ? '' : ' disabled') + '>Continuar al pago</button>' +
     '<p class="legal"><a href="#preventa" data-cerrar2 style="color:var(--mut)">Seguir comprando</a></p>';
@@ -1425,6 +1436,8 @@ function exito(res, pedido) {
   pista.addEventListener('scroll', () => { clearTimeout(marcar.t); marcar.t = setTimeout(marcar, 60); }, { passive: true });
   marcar();
 })();
+
+$('#lnkExtras').onclick = e => { e.preventDefault(); $('#extras').scrollIntoView({ behavior: 'smooth' }); };
 
 /* ---------------- arranque ---------------- */
 $('#btnReintentarCfg').onclick = cargarConfig;
