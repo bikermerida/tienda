@@ -131,6 +131,12 @@ a{color:inherit}
 .lugar b{display:block;font-size:15px}
 .lugar small{color:var(--or);font-size:13px;font-weight:700}
 .zona.cierre{background:linear-gradient(140deg,#24180e 0%,var(--card) 65%);border-color:rgba(245,134,52,.45)}
+.obra{margin-top:14px;border-radius:var(--r);overflow:hidden;border:1px solid rgba(245,134,52,.5);background:var(--card)}
+.cinta{height:14px;background:repeating-linear-gradient(-45deg,var(--or) 0 14px,#111 14px 28px)}
+.obra-txt{display:flex;gap:14px;align-items:flex-start;padding:18px}
+.obra-txt svg{width:34px;height:34px;flex:0 0 34px;color:var(--or);margin-top:2px}
+.obra h3{margin:0;font-size:36px;color:var(--or)}
+.obra p{margin:6px 0 0;color:#d9d4cc;font-size:15.5px}
 .vamos{padding:60px 0 20px;text-align:center}
 .vamos h2{margin:0;font-size:clamp(72px,22vw,156px);line-height:.84}
 .vamos h2 span{color:var(--or)}
@@ -185,6 +191,7 @@ a{color:inherit}
 .prenda{background:var(--bg2);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .prenda .foto{position:relative;background:#f3f2ef;aspect-ratio:1/1}
 .prenda .foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transition:opacity .25s}
+.prenda .foto.foto-cubre img{object-fit:cover}
 .prenda .foto img.b{opacity:0}
 .prenda .foto.esp img.a{opacity:0}
 .prenda .foto.esp img.b{opacity:1}
@@ -506,6 +513,16 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
       </article>
     </div>
 
+    <div class="obra">
+      <div class="cinta" aria-hidden="true"></div>
+      <div class="obra-txt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M5 20l3-9h8l3 9"/><path d="M9.5 15h5M12 3v4M8.5 5.5 12 3l3.5 2.5"/></svg>
+        <div><h3 class="disp">En construcción</h3>
+        <p>Estamos preparando más actividades y sorpresas para esta edición. Muy pronto las agregaremos al programa.</p></div>
+      </div>
+      <div class="cinta" aria-hidden="true"></div>
+    </div>
+
     <div class="vamos">
       <h2 class="disp">Y vamos <span>por más…</span></h2>
       <a class="cta" href="#preventa">Ir a la preventa</a>
@@ -560,7 +577,7 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
     </div>
 
     <div class="cuadro">
-      <h2 class="disp">Extras disponibles<small>Opcional, con reserva de talla. Elige corte, talla y cantidad en cada prenda.</small></h2>
+      <h2 class="disp">Extras disponibles<small>Opcionales. En el jersey y el rompeviento eliges corte, talla y cantidad para reservar tu talla.</small></h2>
       <div class="grid" id="gridPrendas"></div>
     </div>
 
@@ -698,6 +715,7 @@ const RESPALDO = {
   pack_vigente: true,
   precio_jersey: 16,
   precio_rompeviento: 22,
+  precio_bolso: 15,
   tasa_bcv: null,
   fecha_tasa: '',
   tallas: {
@@ -722,7 +740,10 @@ const PRENDAS = [
     fotos: ['jersey-frente.webp', 'jersey-espalda.webp'] },
   { id: 'rompeviento', nombre: 'Rompeviento oficial', clave: 'precio_rompeviento',
     desc: 'Con capucha y cierre · negro y verde neón',
-    fotos: ['rompeviento-frente.webp', 'rompeviento-espalda.webp'] }
+    fotos: ['rompeviento-frente.webp', 'rompeviento-espalda.webp'] },
+  { id: 'bolso', nombre: 'Bolso porta casco', clave: 'precio_bolso', sinTalla: true,
+    desc: 'Con franjas reflectivas · el mismo del Pack Motero',
+    fotos: ['pack-2.webp', 'pack-1.webp'], lados: ['De día', 'Reflectivo'], mini: 'pack-mini.webp' }
 ];
 const CORTES = ['Dama', 'Caballero', 'Niño'];
 const METODOS = {
@@ -838,13 +859,13 @@ function aplicarConfig(c) {
 
 /* ---------------- carrito ---------------- */
 function guardarCarrito() { guardar('bm27_carrito', carrito); pintarContador(); }
-function precio(tipo) { return tipo === 'pack' ? cfg.precio_pack : cfg[tipo === 'jersey' ? 'precio_jersey' : 'precio_rompeviento']; }
+function precio(tipo) { if (tipo === 'pack') return cfg.precio_pack; const d = PRENDAS.find(x => x.id === tipo); return d ? cfg[d.clave] : null; }
 function lineas() {
   const l = [];
   if (carrito.packs > 0) l.push({ tipo: 'pack', nombre: 'Pack Motero', detalle: cfg.etapa, cantidad: carrito.packs, precio: cfg.precio_pack });
   carrito.prendas.forEach((p, i) => {
     const def = PRENDAS.find(x => x.id === p.tipo);
-    if (def) l.push({ tipo: p.tipo, idx: i, nombre: def.nombre, detalle: p.corte + ' · Talla ' + p.talla, cantidad: p.cantidad, precio: precio(p.tipo), foto: def.fotos[0] });
+    if (def) l.push({ tipo: p.tipo, idx: i, nombre: def.nombre, detalle: def.sinTalla ? 'Extra' : p.corte + ' · Talla ' + p.talla, cantidad: p.cantidad, precio: precio(p.tipo), foto: def.mini || def.fotos[0] });
   });
   return l;
 }
@@ -857,7 +878,13 @@ function agregarPack(n) {
   guardarCarrito(); toast('Pack Motero agregado ✓');
 }
 function agregarPrenda(id) {
-  const s = sel[id], errEl = $('#err-' + id);
+  const s = sel[id], errEl = $('#err-' + id), def = PRENDAS.find(p => p.id === id);
+  if (def.sinTalla) {
+    const ex = carrito.prendas.find(p => p.tipo === id);
+    if (ex) ex.cantidad = Math.min(MAX_PRENDA, ex.cantidad + s.cant);
+    else carrito.prendas.push({ tipo: id, corte: '', talla: '', cantidad: s.cant });
+    guardarCarrito(); toast(def.nombre + ' agregado ✓'); s.cant = 1; pintarPrendas(); return;
+  }
   if (!s.corte) { errEl.textContent = 'Elige Dama, Caballero o Niño'; return; }
   if (!s.talla) { errEl.textContent = 'Elige una talla'; return; }
   errEl.textContent = '';
@@ -914,18 +941,18 @@ function pintarPrendas() {
     const s = sel[p.id], pr = cfg[p.clave];
     const tallas = s.corte ? ((cfg.tallas || RESPALDO.tallas)[s.corte] || []) : [];
     return '<article class="prenda">' +
-      '<div class="foto' + (s.lado ? ' esp' : '') + '">' +
-        '<img class="a" src="' + p.fotos[0] + '" alt="' + esc(p.nombre) + ' de frente" loading="lazy" width="640" height="640">' +
-        '<img class="b" src="' + p.fotos[1] + '" alt="' + esc(p.nombre) + ' de espalda" loading="lazy" width="640" height="640">' +
-        '<div class="lados"><button type="button" data-lado="0" data-p="' + p.id + '" class="' + (s.lado ? '' : 'on') + '">Frente</button><button type="button" data-lado="1" data-p="' + p.id + '" class="' + (s.lado ? 'on' : '') + '">Espalda</button></div>' +
+      '<div class="foto' + (s.lado ? ' esp' : '') + (p.sinTalla ? ' foto-cubre' : '') + '">' +
+        '<img class="a" src="' + p.fotos[0] + '" alt="' + esc(p.nombre) + '" loading="lazy" width="640" height="640">' +
+        '<img class="b" src="' + p.fotos[1] + '" alt="' + esc(p.nombre) + ' (otra vista)" loading="lazy" width="640" height="640">' +
+        '<div class="lados"><button type="button" data-lado="0" data-p="' + p.id + '" class="' + (s.lado ? '' : 'on') + '">' + (p.lados ? p.lados[0] : 'Frente') + '</button><button type="button" data-lado="1" data-p="' + p.id + '" class="' + (s.lado ? 'on' : '') + '">' + (p.lados ? p.lados[1] : 'Espalda') + '</button></div>' +
       '</div>' +
       '<div class="info">' +
         '<h3 class="disp">' + esc(p.nombre) + '</h3>' +
         '<div class="precio"><span class="usd">' + (pr ? usd(pr) : '—') + '</span><span class="bs">' + (pr ? lineaBs(pr) : '') + '</span></div>' +
         '<div class="nota-fab">' + esc(p.desc) + '</div>' +
         (cfg.tienda_abierta ?
-          '<div class="lbl">Corte</div><div class="seg">' + CORTES.map(c => '<button type="button" data-corte="' + c + '" data-p="' + p.id + '" class="' + (c === s.corte ? 'on' : '') + '">' + c + '</button>').join('') + '</div>' +
-          (s.corte ? '<div class="lbl">Talla · ' + s.corte + '</div><div class="tallas">' + tallas.map(t => '<button type="button" data-talla="' + t + '" data-p="' + p.id + '" class="' + (t === s.talla ? 'on' : '') + '">' + t + '</button>').join('') + '</div>' : '') +
+          (p.sinTalla ? '' : '<div class="lbl">Corte</div><div class="seg">' + CORTES.map(c => '<button type="button" data-corte="' + c + '" data-p="' + p.id + '" class="' + (c === s.corte ? 'on' : '') + '">' + c + '</button>').join('') + '</div>') +
+          (s.corte && !p.sinTalla ? '<div class="lbl">Talla · ' + s.corte + '</div><div class="tallas">' + tallas.map(t => '<button type="button" data-talla="' + t + '" data-p="' + p.id + '" class="' + (t === s.talla ? 'on' : '') + '">' + t + '</button>').join('') + '</div>' : '') +
           '<div class="lbl">Cantidad</div>' +
           '<div class="compra"><div class="qty"><button type="button" data-q="-1" data-p="' + p.id + '" aria-label="Menos">−</button><span>' + s.cant + '</span><button type="button" data-q="1" data-p="' + p.id + '" aria-label="Más">+</button></div>' +
           '<button type="button" class="cta" data-add="' + p.id + '">Agregar al carrito</button></div><div class="err-inline" id="err-' + p.id + '"></div>'
