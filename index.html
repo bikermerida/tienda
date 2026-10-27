@@ -601,7 +601,7 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
     <div class="cuadro">
       <h2 class="disp">Confirma tu compra<small>Al finalizar te pediremos estos datos. El pedido no se envía hasta que estén completos.</small></h2>
       <ol class="req">
-        <li><span><b>Datos personales del titular</b><small>Nombre, C.I. y teléfono.</small></span></li>
+        <li><span><b>Datos personales del titular</b><small>Nombre, C.I., teléfono y ciudad de origen.</small></span></li>
         <li><span><b>Detalle de tu compra</b><small>Cantidad de packs moteros y prendas con sus tallas, si aplica.</small></span></li>
         <li><span><b>Datos del pago</b><small>Método de pago, número de referencia y captura legible del comprobante.</small></span></li>
       </ol>
@@ -682,6 +682,7 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
           <div class="campo"><label for="fCedula">C.I.</label><input type="text" id="fCedula" placeholder="V12345678" maxlength="20"><div class="e">Revisa la cédula.</div></div>
           <div class="campo"><label for="fTel">Teléfono</label><input type="tel" id="fTel" autocomplete="tel" placeholder="0414-1234567" maxlength="30"><div class="e">Revisa el teléfono.</div></div>
         </div>
+        <div class="campo"><label for="fCiudad">Ciudad de origen</label><input type="text" id="fCiudad" autocomplete="address-level2" maxlength="60" placeholder="Ej: Mérida, Caracas, Bogotá"><div class="e">Escribe tu ciudad de origen.</div></div>
         <div class="campo"><label for="fCorreo">Correo electrónico</label><input type="email" id="fCorreo" autocomplete="email" inputmode="email" maxlength="120"><div class="e">Revisa el correo.</div></div>
       </fieldset>
 
@@ -713,7 +714,7 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
       </fieldset>
 
       <ol class="req" id="checklist">
-        <li data-req="titular"><span><b>Datos personales del titular</b><small>Nombre, C.I., teléfono y correo.</small></span></li>
+        <li data-req="titular"><span><b>Datos personales del titular</b><small>Nombre, C.I., teléfono, ciudad y correo.</small></span></li>
         <li data-req="detalle"><span><b>Detalle de tu compra</b><small id="reqDetalle">Productos en el carrito.</small></span></li>
         <li data-req="pago"><span><b>Datos del pago</b><small>Método, referencia y comprobante.</small></span></li>
       </ol>
@@ -1244,7 +1245,7 @@ function comprimir(f) {
 }
 
 /* ---------------- guardar lo escrito (por si se cierra la página) ---------------- */
-const CAMPOS = ['#fNombre', '#fCedula', '#fTel', '#fCorreo', '#fHotel', '#fRef'];
+const CAMPOS = ['#fNombre', '#fCedula', '#fTel', '#fCiudad', '#fCorreo', '#fHotel', '#fRef'];
 function guardarFormulario() {
   const d = {}; CAMPOS.forEach(id => d[id] = $(id).value);
   d.entrega = co.entrega; d.metodo = co.metodo;
@@ -1269,6 +1270,7 @@ const REGLAS = {
     [$('#fNombre'), $('#fNombre').value.trim().length >= 3],
     [$('#fCedula'), docOk($('#fCedula').value)],
     [$('#fTel'), ($('#fTel').value.match(/\d/g) || []).length >= 7],
+    [$('#fCiudad'), $('#fCiudad').value.trim().length >= 2],
     [$('#fCorreo'), /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test($('#fCorreo').value.trim())]
   ],
   detalle: () => {
@@ -1322,7 +1324,7 @@ function armarPedido() {
   carrito.prendas.forEach(p => items.push({ tipo: p.tipo, corte: p.corte, talla: p.talla, cantidad: p.cantidad }));
   return {
     idEnvio: co.idEnvio || (co.idEnvio = uid()), // el mismo id en todos los intentos: evita pedidos duplicados
-    titular: { nombre: $('#fNombre').value.trim(), cedula: $('#fCedula').value.trim(), telefono: $('#fTel').value.trim(), correo: $('#fCorreo').value.trim() },
+    titular: { nombre: $('#fNombre').value.trim(), cedula: $('#fCedula').value.trim(), telefono: $('#fTel').value.trim(), ciudad: $('#fCiudad').value.trim(), correo: $('#fCorreo').value.trim() },
     entrega: { hospedaje: co.entrega === 'hotel', hotel: $('#fHotel').value.trim() },
     pago: { metodo: co.metodo, referencia: $('#fRef').value.trim() },
     items: items,
