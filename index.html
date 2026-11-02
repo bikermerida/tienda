@@ -298,6 +298,10 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
 .campo input[type=text],.campo input[type=email],.campo input[type=tel]{width:100%;height:52px;padding:0 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg2);font-size:16px;outline:none;transition:border-color .15s}
 .campo input:focus{border-color:var(--or)}
 .campo.mal input{border-color:var(--err)}
+.hosp-op{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hosp-op button{min-height:46px;padding:8px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg2);font-weight:700;font-size:14px;line-height:1.2}
+.hosp-op button.on{border-color:var(--or);background:rgba(245,134,52,.12);color:var(--tx)}
+.campo.mal .hosp-op button{border-color:var(--err)}
 .campo .e{display:none;color:var(--err);font-size:13px;margin-top:5px}
 .campo.mal .e{display:block}
 .dos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -548,7 +552,7 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
       <div class="kicker">Preventa oficial</div>
       <h1 class="disp">Pack Motero · Biker Mérida 2027</h1>
       <div class="precio"><span class="usd" id="pPack">$39</span><span class="tasa">Tasa BCV</span><span class="bs" id="pPackBs"></span></div>
-      <div class="etapa"><i></i><span id="etapaTxt">1ª Preventa · Tarifa especial válida hasta el 31 de octubre</span></div>
+      <div class="etapa"><i></i><span id="etapaTxt">2ª Preventa · Tarifa especial válida hasta el 15 de noviembre</span></div>
       <div class="cierra" id="cierraPreventa"></div>
     </div>
 
@@ -683,6 +687,18 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
           <div class="campo"><label for="fTel">Teléfono</label><input type="tel" id="fTel" autocomplete="tel" placeholder="0414-1234567" maxlength="30"><div class="e">Revisa el teléfono.</div></div>
         </div>
         <div class="campo"><label for="fCiudad">Ciudad de origen</label><input type="text" id="fCiudad" autocomplete="address-level2" maxlength="60" placeholder="Ej: Mérida, Caracas, Bogotá"><div class="e">Escribe tu ciudad de origen.</div></div>
+        <div class="campo" id="campoHosp"><label>¿Dónde te hospedarás en Mérida?</label>
+          <div class="hosp-op" id="hospOp">
+            <button type="button" data-hosp="hotel">Hotel</button>
+            <button type="button" data-hosp="posada">Posada</button>
+            <button type="button" data-hosp="familia">Casa de familia</button>
+            <button type="button" data-hosp="alquiler">Casa o apto. en alquiler turístico</button>
+            <button type="button" data-hosp="local">Vivo en Mérida</button>
+            <button type="button" data-hosp="nosabe">Aún no lo sé</button>
+          </div>
+          <div class="e">Elige dónde te hospedarás.</div>
+        </div>
+        <div class="campo" id="campoHospLugar" style="display:none"><label for="fHospLugar" id="lblHospLugar">Nombre del hotel</label><input type="text" id="fHospLugar" maxlength="80"><div class="e" id="eHospLugar">Escribe el nombre.</div></div>
         <div class="campo"><label for="fCorreo">Correo electrónico</label><input type="email" id="fCorreo" autocomplete="email" inputmode="email" maxlength="120"><div class="e">Revisa el correo.</div></div>
       </fieldset>
 
@@ -714,7 +730,7 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
       </fieldset>
 
       <ol class="req" id="checklist">
-        <li data-req="titular"><span><b>Datos personales del titular</b><small>Nombre, C.I., teléfono, ciudad y correo.</small></span></li>
+        <li data-req="titular"><span><b>Datos personales del titular</b><small>Nombre, C.I., teléfono, ciudad, hospedaje y correo.</small></span></li>
         <li data-req="detalle"><span><b>Detalle de tu compra</b><small id="reqDetalle">Productos en el carrito.</small></span></li>
         <li data-req="pago"><span><b>Datos del pago</b><small>Método, referencia y comprobante.</small></span></li>
       </ol>
@@ -751,9 +767,9 @@ const EVENTO_FIN = '2027-01-06T22:00:00-04:00';
    Precios, tasa, dirección y WhatsApp reales vienen de la hoja Config. */
 const RESPALDO = {
   tienda_abierta: true,
-  etapa: '1ª Preventa',
+  etapa: '2ª Preventa',
   precio_pack: 39,
-  fecha_limite: '2026-10-31T23:59:00-04:00',
+  fecha_limite: '2026-11-15T23:59:00-04:00',
   pack_vigente: true,
   precio_jersey: 16,
   precio_rompeviento: 22,
@@ -834,7 +850,7 @@ if (!carrito || !Array.isArray(carrito.prendas)) carrito = { packs: 0, prendas: 
 const sel = {};
 PRENDAS.forEach(p => sel[p.id] = { corte: null, talla: null, cant: 1, lado: 0 });
 let packCant = 1;
-let co = { entrega: 'taquilla', metodo: null, comprobante: null, idEnvio: null };
+let co = { entrega: 'taquilla', metodo: null, comprobante: null, idEnvio: null, hosp: null };
 
 /* ---------------- vistas: Inicio / Programa / Preventa ---------------- */
 const VISTAS = ['inicio', 'programa', 'preventa', 'hospedaje'];
@@ -1245,10 +1261,10 @@ function comprimir(f) {
 }
 
 /* ---------------- guardar lo escrito (por si se cierra la página) ---------------- */
-const CAMPOS = ['#fNombre', '#fCedula', '#fTel', '#fCiudad', '#fCorreo', '#fHotel', '#fRef'];
+const CAMPOS = ['#fNombre', '#fCedula', '#fTel', '#fCiudad', '#fHospLugar', '#fCorreo', '#fHotel', '#fRef'];
 function guardarFormulario() {
   const d = {}; CAMPOS.forEach(id => d[id] = $(id).value);
-  d.entrega = co.entrega; d.metodo = co.metodo;
+  d.entrega = co.entrega; d.metodo = co.metodo; d.hosp = co.hosp;
   d.pilotos = $$('#pilotos .piloto').map(p => ({ n: p.querySelector('[data-pn]').value, c: p.querySelector('[data-pc]').value }));
   guardar('bm27_form', d);
 }
@@ -1257,6 +1273,7 @@ function restaurarFormulario() {
   CAMPOS.forEach(id => { if (!$(id).value && d[id]) $(id).value = d[id]; });
   if (d.entrega && d.entrega !== co.entrega) { const b = $('[data-entrega="' + d.entrega + '"]'); if (b) b.click(); }
   if (d.metodo && !co.metodo) { co.metodo = d.metodo; pintarPagos(); }
+  if (d.hosp && !co.hosp) { co.hosp = d.hosp; pintarHosp(); }
 }
 $('#frm').addEventListener('input', e => {
   const c = e.target.closest('.campo'); if (c) c.classList.remove('mal');
@@ -1271,6 +1288,8 @@ const REGLAS = {
     [$('#fCedula'), docOk($('#fCedula').value)],
     [$('#fTel'), ($('#fTel').value.match(/\d/g) || []).length >= 7],
     [$('#fCiudad'), $('#fCiudad').value.trim().length >= 2],
+    [$('#hospOp'), !!co.hosp],
+    ...(co.hosp === 'hotel' || co.hosp === 'posada' ? [[$('#fHospLugar'), $('#fHospLugar').value.trim().length >= 2]] : []),
     [$('#fCorreo'), /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test($('#fCorreo').value.trim())]
   ],
   detalle: () => {
@@ -1324,7 +1343,7 @@ function armarPedido() {
   carrito.prendas.forEach(p => items.push({ tipo: p.tipo, corte: p.corte, talla: p.talla, cantidad: p.cantidad }));
   return {
     idEnvio: co.idEnvio || (co.idEnvio = uid()), // el mismo id en todos los intentos: evita pedidos duplicados
-    titular: { nombre: $('#fNombre').value.trim(), cedula: $('#fCedula').value.trim(), telefono: $('#fTel').value.trim(), ciudad: $('#fCiudad').value.trim(), correo: $('#fCorreo').value.trim() },
+    titular: { nombre: $('#fNombre').value.trim(), cedula: $('#fCedula').value.trim(), telefono: $('#fTel').value.trim(), ciudad: $('#fCiudad').value.trim(), hospedajeTipo: co.hosp, hospedajeLugar: $('#fHospLugar').value.trim(), correo: $('#fCorreo').value.trim() },
     entrega: { hospedaje: co.entrega === 'hotel', hotel: $('#fHotel').value.trim() },
     pago: { metodo: co.metodo, referencia: $('#fRef').value.trim() },
     items: items,
@@ -1403,7 +1422,7 @@ function exito(res, pedido) {
   const wa = numeroWa(cfg.whatsapp);
   const textoWa = mensajeWa(res.orden, pedido); // se arma antes de vaciar el carrito
   carrito = { packs: 0, prendas: [] }; guardarCarrito();
-  borrar('bm27_form'); $('#frm').reset(); co = { entrega: 'taquilla', metodo: null, comprobante: null, idEnvio: null };
+  borrar('bm27_form'); $('#frm').reset(); co = { entrega: 'taquilla', metodo: null, comprobante: null, idEnvio: null, hosp: null }; pintarHosp();
   $('#avisoPendiente').classList.remove('on');
   let botonWa = '';
   if (wa) botonWa = '<a class="cta wa" href="https://wa.me/' + wa + '?text=' + encodeURIComponent(textoWa) + '" target="_blank" rel="noopener">' + ICONO_WA + '<span>Enviar confirmación por WhatsApp</span></a>';
@@ -1440,6 +1459,27 @@ function exito(res, pedido) {
 })();
 
 $('#lnkExtras').onclick = e => { e.preventDefault(); $('#extras').scrollIntoView({ behavior: 'smooth' }); };
+
+/* ---------------- dónde se hospeda ---------------- */
+function pintarHosp() {
+  $$('#hospOp [data-hosp]').forEach(b => b.classList.toggle('on', b.dataset.hosp === co.hosp));
+  const conNombre = co.hosp === 'hotel' || co.hosp === 'posada';
+  $('#campoHospLugar').style.display = conNombre ? '' : 'none';
+  if (conNombre) {
+    $('#lblHospLugar').textContent = co.hosp === 'hotel' ? 'Nombre del hotel' : 'Nombre de la posada';
+    $('#eHospLugar').textContent = co.hosp === 'hotel' ? 'Escribe el nombre del hotel.' : 'Escribe el nombre de la posada.';
+  }
+}
+$('#hospOp').addEventListener('click', e => {
+  const b = e.target.closest('[data-hosp]'); if (!b) return;
+  co.hosp = b.dataset.hosp; $('#campoHosp').classList.remove('mal');
+  pintarHosp(); guardarFormulario(); revisarChecklist();
+});
+// si contrató hospedaje con Biker Mérida y ya escribió el hotel arriba, lo copiamos a la entrega
+$('#fHospLugar').addEventListener('input', () => {
+  if (co.entrega === 'hotel' && co.hosp === 'hotel' && !$('#fHotel').dataset.tocado) $('#fHotel').value = $('#fHospLugar').value;
+});
+$('#fHotel').addEventListener('input', () => { $('#fHotel').dataset.tocado = '1'; });
 
 /* ---------------- arranque ---------------- */
 $('#btnReintentarCfg').onclick = cargarConfig;
