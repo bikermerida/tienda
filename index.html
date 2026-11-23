@@ -577,6 +577,7 @@ legend small{font-family:var(--body);font-size:13px;color:var(--mut);text-transf
     <div class="cuadro" id="cuadroCompleto">
       <span class="limit">Cantidad limitada</span>
       <h2 class="disp">Pack Motero Completo<small>3 brazaletes + kit de souvenirs oficiales · Acceso total los 4 días.</small></h2>
+      <div class="precio"><span class="usd" id="pPack2">$45</span><span class="bs" id="pPackBs2"></span></div>
       <div class="galeria">
         <div class="g-pista" id="gPista">
           <figure><img src="pack-2.webp" alt="Bolso porta casco Biker Mérida" width="720" height="960" loading="lazy"><figcaption>Bolso porta casco</figcaption></figure>
@@ -1017,6 +1018,8 @@ function pintarPack() {
   const pb = cfg.precio_brazaletes;
   $('#pPack').textContent = cfg.precio_pack ? usd(cfg.precio_pack) : '—';
   $('#pPackBs').textContent = cfg.precio_pack && cfg.tasa_bcv ? bs(cfg.precio_pack * cfg.tasa_bcv) : '';
+  $('#pPack2').textContent = cfg.precio_pack ? usd(cfg.precio_pack) : '—';
+  $('#pPackBs2').textContent = cfg.precio_pack ? lineaBs(cfg.precio_pack) : '';
   $('#pBraz').textContent = $('#pBraz2').textContent = pb ? usd(pb) : '—';
   $('#pBrazBs').textContent = pb && cfg.tasa_bcv ? bs(pb * cfg.tasa_bcv) : '';
   $('#pBrazBs2').textContent = pb ? lineaBs(pb) : '';
